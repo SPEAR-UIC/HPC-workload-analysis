@@ -1,0 +1,5 @@
+name,min,max
+tiny,1,10
+small,11,24
+medium,25,99
+large,100,496

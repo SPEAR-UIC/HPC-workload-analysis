@@ -1,0 +1,12 @@
+name,min,max
+shortest,1,60
+short,61,600
+medium-short,601,1800
+medium,1801,3600
+medium-long,3601,7200
+long,7201,21600
+very-long,21601,43200
+super-extreme,43201,64800
+ultra,64801,86400
+mega,86401,259200
+extra-infinity,259201,infinity
