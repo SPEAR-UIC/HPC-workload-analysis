@@ -205,3 +205,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+Additional/
+analysis_output/
+# Everything that is in data and ends in csv.gz
+data/**/*.csv.gz
