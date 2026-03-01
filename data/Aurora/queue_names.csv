@@ -1,0 +1,12 @@
+queue_name,min_nodes,max_nodes,min_walltime,max_walltime
+debug,1,2,00:05:00,01:00:00
+debug-scaling,2,31,00:05:00,01:00:00
+tiny,1,512,00:05:00,06:00:00
+small,513,1024,00:05:00,12:00:00
+medium,1025,1919,00:05:00,18:00:00
+large,1920,10624,00:05:00,24:00:00
+backfill-tiny,1,512,00:05:00,06:00:00
+backfill-small,513,1024,00:05:00,12:00:00
+backfill-medium,1025,1919,00:05:00,18:00:00
+backfill-large,1920,10624,00:05:00,24:00:00
+visualization,1,32,00:05:00,08:00:00
