@@ -1,0 +1,12 @@
+# HPC Workload Analysis — Python dependencies
+# Tested with Python 3.10.12
+#
+# Install with:
+#   pip install -r requirements.txt
+
+pandas
+numpy
+matplotlib
+seaborn
+statsmodels
+colour-science  
