@@ -1,60 +1,121 @@
-# HPC Workload Analysis
+# 🚀 HPC Workload Analysis
 
-A Python analysis pipeline for characterising **High-Performance Computing (HPC) job scheduler logs**.  
-It ingests raw job data, cleans it, computes per-queue and machine-wide statistics, and produces a comprehensive set of publication-ready plots and text reports.
+A modular Python pipeline for analysing **High-Performance Computing (HPC) scheduler logs**.
 
----
-
-## Table of Contents
-
-1. [Overview](#overview)  
-2. [Repository Structure](#repository-structure)  
-3. [Input Data Requirements](#input-data-requirements)  
-   - [Raw Job Log CSV](#raw-job-log-csv)  
-   - [Machine Configuration Files](#machine-configuration-files)  
-4. [Preprocessing](#preprocessing)  
-5. [Running the Analysis](#running-the-analysis)  
-   - [CLI Arguments](#cli-arguments)  
-6. [Output Description](#output-description)  
-   - [Directory Layout](#output-directory-layout)  
-   - [Plots Produced](#plots-produced)  
-   - [Text Reports](#text-reports)  
-7. [Module Reference](#module-reference)  
-8. [Dependencies](#dependencies)
+It transforms raw job exports into a clean dataset, computes machine-wide and per-queue statistics, and produces **publication-ready plots and detailed text reports**.
 
 ---
 
-## Overview
+## ✨ Key Features
 
-The pipeline has **two stages**:
-
-|   Stage   | Script | Purpose |
-|---------|--------|---------|
-| **1 — Preprocessing** | `src/preprocessor.py` | Reads raw scheduler CSVs, normalises columns, derives metrics, filters anomalies, deduplicates, and writes a compressed `*_preprocessed.csv.gz`. |
-| **2 — Analysis** | `src/main.py` | Reads a preprocessed CSV plus machine-config files and generates all plots and reports. |
-
-### What the analysis produces
-
-* **Temporal distribution** plots — job submission patterns by hour, weekday, and day-of-year.
-* **Job-size distribution** — bar chart of jobs across configurable node-count bins.
-* **Walltime distribution** — bar chart of jobs across configurable walltime bins.
-* **Job-size × Walltime heatmap** — 2-D heat map with log colour scale.
-* **Temporal scatter plot** — every job on a timeline (x = date, y = walltime, colour/size = nodes).
-* **Machine utilization** — time-series of node usage % with rolling/LOWESS trends.
-* **Per-queue core-hour breakdown** — stacked bar, stacked area, and pie charts.
-* **Detailed text summaries** — per-queue statistics (mean/median/P5/P95 for nodes, walltime, runtime, wait time, core-hours, efficiency).
-
-All analyses can optionally be repeated **per year** and **per month**.
+- 🧹 Automated data cleaning & validation  
+- 📊 Temporal workload characterisation  
+- 📦 Job size & walltime distributions  
+- 🔥 Job size × walltime heatmaps  
+- 🧮 Per-queue core-hour accounting  
+- 🖥 Machine utilization over time  
+- 📅 Optional yearly / monthly breakdowns  
+- 📄 Structured text summaries for reporting  
 
 ---
 
-## Repository Structure
+# 🏗 Pipeline Overview
 
+The workflow is composed of **two stages**:
+
+---
+
+## 🧹 Stage 1 — Preprocessing  
+`src/preprocessor.py`
+
+Transforms raw scheduler exports into a clean, analysis-ready dataset.
+
+### ✔ What it does
+
+- Reads raw HPC scheduler CSV logs  
+- Normalises column names  
+- Parses timestamps  
+- Computes derived metrics (runtime, wait time, core-hours)  
+- Filters corrupted / anomalous records  
+- Removes duplicate jobs  
+- Outputs compressed dataset  
+
+### 📦 Output
+```
+*_preprocessed.csv.gz
+```
+
+
+---
+
+## 📊 Stage 2 — Analysis  
+`src/main.py`
+
+Generates figures, statistics, and structured reports.
+
+---
+
+### 📅 Temporal Workload Characterisation
+
+- **Hourly submission distribution**
+- **Weekday distribution**
+- **Day-of-year distribution** (seasonality)
+
+---
+
+### 📦 Job Characteristics
+
+- Job-size distribution (node-count bins)
+- Walltime distribution (custom bins)
+- Job-size × Walltime heatmap (log colour scale)
+
+---
+
+### 📊 Temporal & System Behaviour
+
+- **Timeline scatter plot**
+  - x-axis: submission date  
+  - y-axis: walltime (log scale)  
+  - marker size/colour: node count  
+
+- **Machine utilization**
+  - Time-series of node usage (%)  
+  - Rolling averages  
+  - LOWESS trend estimation  
+
+---
+
+### 🧮 Queue-Level Resource Accounting
+
+- Stacked bar charts (core-hours by queue)
+- Stacked cumulative area charts
+- Pie charts (overall share)
+
+#### Detailed statistical summaries per queue:
+
+- Nodes (mean / median / P5 / P95)
+- Walltime
+- Runtime
+- Wait time
+- Core-hours
+- Efficiency
+
+---
+
+### 🔁 Optional Granularity
+
+All analyses can be repeated:
+
+- Per year (`--yearly`)
+- Per month (`--monthly`)
+
+---
+
+# 📂 Repository Structure
 ```
 HPC-workload-analysis/
 ├── README.md                   # This file
 ├── LICENSE
-├── requirements.txt            # Python dependencies (pip install -r requirements.txt)
 ├── data/                       # Input data (one sub-folder per machine)
 │   ├── Polaris/
 │   │   ├── *.csv.gz            # Raw job log files (from scheduler)
@@ -83,14 +144,13 @@ HPC-workload-analysis/
 │   │   └── queue_analysis/     # Queue breakdown (if --queue-analysis)
 │   └── Aurora/
 │       └── ...
-└── Additional/                 # Supplementary / advanced scripts
 ```
 
 ---
 
-## Input Data Requirements
+# 📥 Input Data Requirements
 
-### Data Sources (ALCF)
+## Data Sources (ALCF)
 
 | What | URL |
 |------|-----|
@@ -219,182 +279,112 @@ data/Polaris/
 
 ---
 
-## Preprocessing
+# 🧹 Preprocessing
 
-Run the preprocessor **before** the main analysis.
+Run **before** analysis:
 
 ```bash
-# Navigate to the source directory
 cd src/
 
 # Single file
-python preprocessor.py --path ../data/Polaris/raw_jobs.csv.gz --single
+python preprocessor.py --path ../data/Polaris/file.csv.gz --single
 
-# All CSV files in a directory (merged into one output)
+# All files in directory
 python preprocessor.py --path ../data/Polaris/ --all
 ```
 
-**What the preprocessor does:**
+---
 
-1. Reads raw CSV(s) and keeps only the required columns.
-2. Normalises column names to lowercase.
-3. Parses timestamp columns.
-4. Derives: `wait_seconds` (time spent in queue before execution).
-5. Filters out invalid rows:
-   - `runtime_seconds >= 1.5 × walltime_seconds`
-   - Negative runtimes or walltimes
-   - Negative core-hours
-6. Deduplicates by `job_name`.
-7. Writes `*_preprocessed.csv.gz` (per-file and merged).
+## 🧹 Filtering Rules
+
+The preprocessor removes rows with:
+
+- `runtime ≥ 1.5 × walltime`
+- Negative runtimes or walltimes
+- Negative core-hours
+- Duplicate `job_name`
 
 ---
 
-## Running the Analysis
+# ▶ Running the Analysis
+
+## Minimal run
 
 ```bash
-cd src/
+python main.py \
+  --path ../data/Polaris/jobs_preprocessed.csv.gz \
+  --machine-name Polaris
+  ```
 
-# Minimal run (distribution plots only)
-python main.py --path ../data/Polaris/jobs_preprocessed.csv.gz \
-               --machine-name Polaris
+  ## Full analysis
 
-# Full analysis with all extras
-python main.py --path ../data/Polaris/jobs_preprocessed.csv.gz \
-               --machine-name Polaris \
-               --queue-analysis \
-               --machine-utilization \
-               --yearly \
-               --monthly \
-               --full-queue-analysis
+```bash
+python main.py \
+  --path ../data/Polaris/jobs_preprocessed.csv.gz \
+  --machine-name Polaris \
+  --queue-analysis \
+  --machine-utilization \
+  --yearly \
+  --monthly \
+  --full-queue-analysis
 ```
+Output is written to:
 
-### CLI Arguments
+```text
+analysis_output/<machine-name>/
+```
+---
 
-| Argument | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `--path` | **Yes** | — | Path to the preprocessed `.csv.gz` file |
-| `--machine-name` | **Yes** | — | Machine label (e.g. `Polaris`, `Aurora`). Used in plot titles and filenames. |
-| `--queue-analysis` / `--no-queue-analysis` | No | `False` | Generate per-queue core-hour breakdown (stacked bar, stacked area, pie charts, text summaries). The breakdown is produced for the full dataset; when combined with `--yearly` or `--monthly`, a `queue_analysis/` folder is also created inside each year / month slice. Requires `queue_names.csv`. |
-| `--machine-utilization` / `--no-machine-utilization` | No | `False` | Compute and plot node utilization over time. |
-| `--yearly` / `--no-yearly` | No | `False` | Repeat the analysis for each calendar year found in the data. |
-| `--monthly` / `--no-monthly` | No | `False` | Repeat the analysis for each (year, month) pair found in the data. |
-| `--full-queue-analysis` / `--no-full-queue-analysis` | No | `False` | Generate per-queue distribution plots (job-size, walltime, heatmap, scatter) for **every** individual queue, in queue_names.csv in the original data folder. |
+# 📊 Generated Plots
 
-Output is written to `analysis_output/<machine-name>/` (created automatically).
+- Hourly distribution  
+- Weekday distribution  
+- Day-of-year seasonality  
+- Job-size distribution  
+- Walltime distribution  
+- Job-size × Walltime heatmap  
+- Timeline scatter plot  
+- Machine utilization time-series  
+- Queue stacked bar / area / pie charts  
 
 ---
 
-## Output Description
+# 📄 Text Reports
 
-### Output Directory Layout
+- Detailed per-queue statistical summary  
+- Successful-jobs-only summary  
 
-```
-analysis_output/Polaris/
-├── distribution_over_days.png
-├── distribution_over_hours.png
-├── distribution_over_years.png
-├── job_size_distribution.png
-├── distribution_over_walltime.png
-├── Polaris_job_size_vs_walltime_heatmap.png
-├── Polaris_distribution_over_time.png
-├── Polaris_utilization_over_time.png          # (--machine-utilization)
-│
-├── queue_analysis/                            # (--queue-analysis, full-range)
-│   ├── Polaris_queue_analysis_monthly_stacked_bar.png
-│   ├── Polaris_queue_analysis_monthly_cumulative_area.png
-│   ├── Polaris_queue_analysis_monthly_pie_chart.png
-│   ├── Polaris_queue_analysis_detailed_summary.txt
-│   └── Polaris_queue_analysis_successful_jobs_detailed_summary.txt
-│
-├── queue_<name>/                              # (--full-queue-analysis)
-│   ├── job_size_distribution.png
-│   ├── distribution_over_walltime.png
-│   ├── *_job_size_vs_walltime_heatmap.png
-│   └── *_distribution_over_time*.png
-│
-├── 2024_analysis/                             # (--yearly)
-│   ├── distribution_over_days.png
-│   ├── distribution_over_hours.png
-│   ├── distribution_over_years.png
-│   ├── job_size_distribution.png
-│   ├── distribution_over_walltime.png
-│   ├── Polaris_job_size_vs_walltime_heatmap.png
-│   ├── Polaris_distribution_over_time_2024.png
-│   ├── Polaris_utilization_over_time_2024.png
-│   │
-│   ├── queue_analysis/                        # (--queue-analysis + --yearly)
-│   │   ├── *_weekly_stacked_bar.png
-│   │   ├── *_weekly_cumulative_area.png
-│   │   ├── *_weekly_pie_chart.png
-│   │   ├── *_detailed_summary.txt
-│   │   └── *_successful_jobs_detailed_summary.txt
-│   │
-│   └── 6_analysis/                            # (--monthly, nested under year)
-│       ├── distribution_over_days.png
-│       ├── ...
-│       └── queue_analysis/                    # (--queue-analysis + --monthly)
-│           ├── *_daily_stacked_bar.png
-│           ├── *_daily_cumulative_area.png
-│           ├── *_daily_pie_chart.png
-│           ├── *_detailed_summary.txt
-│           └── *_successful_jobs_detailed_summary.txt
-└── ...
-```
+### Each report includes
 
-### Plots Produced
-
-| Plot | Filename | Description |
-|------|----------|-------------|
-| **Hours distribution** | `distribution_over_hours.png` | Bar chart — mean % of jobs by hour of day (0–23) with std error bars. |
-| **Weekday distribution** | `distribution_over_days.png` | Bar chart — mean % of jobs by weekday (Mon–Sun) with std error bars. |
-| **Day-of-year distribution** | `distribution_over_years.png` | Smoothed line chart — rolling mean % by day-of-year (Jan–Dec) with ±std band. |
-| **Job-size distribution** | `job_size_distribution.png` | Bar chart — % of jobs in each node-count bin (annotated). |
-| **Walltime distribution** | `distribution_over_walltime.png` | Colour-coded bar chart with legend mapping position labels to walltime ranges. |
-| **Job-size × Walltime heatmap** | `*_job_size_vs_walltime_heatmap.png` | 2-D heatmap with log colour scale; rows = node bins, columns = walltime bins. |
-| **Temporal scatter** | `*_distribution_over_time*.png` | Scatter plot (x = date, y = walltime [log], colour/size = nodes used). |
-| **Machine utilization** | `*_utilization_over_time*.png` | Time-series: raw utilization, mean ± std band, 50 % line, rolling average, LOWESS trend. |
-| **Queue stacked bar** | `*_stacked_bar.png` | Daily/weekly/monthly core-hours by queue (top N + Other). |
-| **Queue stacked area** | `*_cumulative_area.png` | Cumulative core-hours running total by queue. |
-| **Queue pie chart** | `*_pie_chart.png` | Overall core-hours share per queue (small queues collapsed into Other). |
-
-### Text Reports
-
-| Report | Filename | Description |
-|--------|----------|-------------|
-| **Detailed queue summary** | `*_detailed_summary.txt` | Per-queue: job count, core-hours, share %, efficiency, mean/median/P5/P95/min/max for nodes, walltime, runtime, wait, core-hours, unique users/projects. |
-| **Successful-only summary** | `*_successful_jobs_detailed_summary.txt` | Same as above but filtered to exit_code ∈ {0, −29}. |
+- Job count  
+- Core-hours  
+- Share %  
+- Efficiency  
+- Mean / median / P5 / P95 / min / max  
+- Unique users & projects  
 
 ---
 
-## Module Reference
+# 🧠 Module Responsibilities
 
-| Module | Role |
-|--------|------|
-| `main.py` | CLI entry point.  Parses arguments, reads the CSV, loads config, drives full / per-year / per-month analysis. |
-| `orchestrator.py` | Central coordinator.  Computes time distributions and delegates to plotting + queue analysis. |
-| `preprocessor.py` | Raw → clean CSV converter.  Run before the main analysis. |
-| `plotting.py` | All matplotlib/seaborn visualisation functions (13 plot types). |
-| `report.py` | Generates plain-text per-queue statistical summaries. |
-| `single_queue_analysis.py` | Queue core-hour breakdown at daily / weekly / monthly granularity. |
-| `system_utilization.py` | Event-based node utilization computation + over-capacity detection. |
-| `utils.py` | Shared helpers: CLI parser, config loader, bin counting, pivoting, colour generation, formatting. |
+| Module | Purpose |
+|--------|---------|
+| `main.py` | CLI entry point |
+| `orchestrator.py` | Coordinates computations |
+| `preprocessor.py` | Cleans raw CSV logs |
+| `plotting.py` | Generates visualisations |
+| `report.py` | Builds text summaries |
+| `single_queue_analysis.py` | Queue core-hour breakdown |
+| `system_utilization.py` | Node utilization computation |
+| `utils.py` | Shared helpers |
 
 ---
 
-## Dependencies
+# ⚙ Dependencies
 
-Requires **Python 3.10+**. All dependencies are listed in [`requirements.txt`](requirements.txt).
+Tested on **Python 3.10+**
 
-| Package | Purpose |
-|---------|---------|
-| `pandas` | Data loading, filtering, aggregation |
-| `numpy` | Numerical operations, array handling |
-| `matplotlib` | Plot rendering (Agg backend) |
-| `seaborn` | Statistical heatmaps |
-| `statsmodels` | LOWESS trend line in utilization plot |
-| `colour-science` | Perceptually distinct colour generation (LCH space) |
-
-Install all dependencies:
+Install:
 
 ```bash
 pip install -r requirements.txt
@@ -402,4 +392,17 @@ pip install -r requirements.txt
 
 ---
 
-*PhD Research — HPC Workload Analysis*
+## Core Packages
+
+- `pandas`
+- `numpy`
+- `matplotlib`
+- `seaborn`
+- `statsmodels`
+- `colour-science`
+
+---
+
+# 🎓 Research Context
+
+Developed as part of PhD research on **HPC workload characterisation and resource utilization modelling**.
