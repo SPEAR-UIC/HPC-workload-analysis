@@ -1,4 +1,4 @@
-# 🚀 HPC Workload Analysis
+# HPC Workload Analysis
 
 A modular Python pipeline for analysing **High-Performance Computing (HPC) scheduler logs**.
 
