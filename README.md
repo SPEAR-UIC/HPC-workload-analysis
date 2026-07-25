@@ -1,5 +1,10 @@
 # HPC Workload Analysis
 
+If you use the tool, please cite the following paper:
+
+Melanie Cornelius, Greg Cross, Shilpika, Michael E. Papka, and Zhiling Lan, "Fusing System Data to Navigate Power-Saving Opportunities", the 29th Workshop on Job Scheduling Strategies for Parallel Processing (JSSPP 2026), in conjunction with IPDPS 2026.
+
+
 A modular Python pipeline for analysing **High-Performance Computing (HPC) scheduler logs**.
 
 It transforms raw job exports into a clean dataset, computes machine-wide and per-queue statistics, and produces **publication-ready plots and detailed text reports**.
