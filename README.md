@@ -2,7 +2,7 @@
 
 If you use the tool, please cite the following paper:
 
-Melanie Cornelius, Greg Cross, Shilpika, Michael E. Papka, and Zhiling Lan, "Fusing System Data to Navigate Power-Saving Opportunities", the 29th Workshop on Job Scheduling Strategies for Parallel Processing (JSSPP 2026), in conjunction with IPDPS 2026.
+Niccolò Brembilla, Zhiling Lan, and Michael E. Papka, "From Petascale to Exascale: User Behavior Analysis", the 29th Workshop on Job Scheduling Strategies for Parallel Processing (JSSPP 2026), in conjunction with IPDPS 2026.
 
 
 A modular Python pipeline for analysing **High-Performance Computing (HPC) scheduler logs**.
